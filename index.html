@@ -1,109 +1,242 @@
-
 <!DOCTYPE html>
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ODAY RACING</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ODAY RACING 3D</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#090d16;color:white;font-family:Arial;text-align:center;overflow:hidden}
-header{padding:12px;background:#111827;font-size:24px;font-weight:bold;color:#00e5ff}
-#stats{display:flex;justify-content:space-around;padding:10px;background:#172033}
-#game{position:relative;width:100%;height:68vh;overflow:hidden;background:linear-gradient(#182b3d,#34434d)}
-.road{position:absolute;left:15%;width:70%;height:100%;background:#292d35;border-left:6px solid white;border-right:6px solid white}
-.line{position:absolute;left:50%;height:100%;border-left:5px dashed #eee;animation:move .7s linear infinite}
-@keyframes move{from{transform:translateY(-100px)}to{transform:translateY(0)}}
-.car{position:absolute;width:48px;height:85px;border-radius:12px 12px 7px 7px;background:linear-gradient(90deg,#a80000,#ff3434,#a80000);bottom:20px;left:calc(50% - 24px);border:3px solid #eee;box-shadow:0 0 15px #f33}
-.car:before{content:"";position:absolute;top:15px;left:7px;width:28px;height:24px;background:#8deaff;border-radius:5px}
-.enemy{position:absolute;width:45px;height:78px;border-radius:10px;background:#ffcc00;border:3px solid white;top:-100px}
-#controls{display:flex;justify-content:space-around;padding:15px}
-button{background:#00bcd4;color:#00131a;border:0;border-radius:12px;padding:15px 25px;font-size:19px;font-weight:bold}
-#start{margin:12px}
-#message{font-size:20px;color:#00e5ff;padding:8px}
+body{margin:0;overflow:hidden;background:#080d18;color:white;font-family:Arial}
+#hud{position:absolute;top:10px;left:0;width:100%;display:flex;justify-content:space-around;z-index:2;font-weight:bold;text-shadow:0 2px 5px black}
+#title{position:absolute;top:45px;width:100%;text-align:center;color:#00eaff;font-size:22px;font-weight:bold;z-index:2}
+#message{position:absolute;top:45%;width:100%;text-align:center;font-size:22px;text-shadow:0 2px 5px black;z-index:3}
+#controls{position:absolute;bottom:20px;width:100%;display:flex;justify-content:space-around;z-index:4}
+button{border:2px solid #00eaff;background:#102b43dd;color:white;border-radius:15px;padding:15px 22px;font-size:20px;font-weight:bold}
+#start{position:absolute;top:55%;left:50%;transform:translateX(-50%);z-index:5;background:#00cde8;color:#00121b}
 </style>
 </head>
 <body>
-<header>🏁 ODAY RACING</header>
-<div id="stats">
-<span>النقاط: <b id="score">0</b></span>
-<span>السرعة: <b id="speed">1</b></span>
-<span>العملات: <b id="coins">0</b></span>
+<div id="hud">
+ <span>🏆 <b id="score">0</b></span>
+ <span>⚡ <b id="speed">1</b></span>
+ <span>🪙 <b id="coins">0</b></span>
 </div>
-<div id="game">
-<div class="road"></div>
-<div class="line"></div>
-<div id="player" class="car"></div>
-<div id="enemy" class="enemy"></div>
-</div>
-<div id="message">استعد للسباق يا بطل!</div>
-<button id="start" onclick="startGame()">ابدأ السباق 🚀</button>
+<div id="title">ODAY RACING 3D</div>
+<div id="message">استعد للسباق!</div>
+<button id="start" onclick="startGame()">ابدأ السباق 🏁</button>
 <div id="controls">
-<button onclick="move(-1)">⬅️ يسار</button>
-<button onclick="nitro()">🔥 نيترو</button>
-<button onclick="move(1)">يمين ➡️</button>
+ <button onclick="move(-1)">⬅️</button>
+ <button onclick="boost()">🔥 نيترو</button>
+ <button onclick="move(1)">➡️</button>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
-const player=document.getElementById("player");
-const enemy=document.getElementById("enemy");
-const scoreText=document.getElementById("score");
-const coinsText=document.getElementById("coins");
-const speedText=document.getElementById("speed");
-const message=document.getElementById("message");
-let lane=1,score=0,coins=0,speed=5,running=false,enemyY=-100;
-let timer;
-function move(dir){
- if(!running)return;
- lane=Math.max(0,Math.min(2,lane+dir));
- player.style.left=(25+lane*25)+"%";
- player.style.transform="translateX(-50%)";
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x87b9df);
+scene.fog=new THREE.Fog(0x87b9df,35,150);
+
+const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,300);
+camera.position.set(0,7,13);
+
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;
+document.body.appendChild(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x46536b,2));
+const sun=new THREE.DirectionalLight(0xffffff,2);
+sun.position.set(-8,18,8);
+sun.castShadow=true;
+scene.add(sun);
+
+const ground=new THREE.Mesh(
+ new THREE.PlaneGeometry(250,250),
+ new THREE.MeshStandardMaterial({color:0x53634c})
+);
+ground.rotation.x=-Math.PI/2;
+ground.position.y=-.15;
+scene.add(ground);
+
+const road=new THREE.Mesh(
+ new THREE.PlaneGeometry(15,240),
+ new THREE.MeshStandardMaterial({color:0x252932})
+);
+road.rotation.x=-Math.PI/2;
+road.position.z=-85;
+road.position.y=-.1;
+scene.add(road);
+
+function box(w,h,d,color,x,y,z){
+ const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),
+ new THREE.MeshStandardMaterial({color,roughness:.7}));
+ m.position.set(x,y,z);
+ m.castShadow=true;
+ m.receiveShadow=true;
+ scene.add(m);
+ return m;
 }
-function nitro(){
- if(running){speed=11;setTimeout(()=>speed=5,2000)}
+
+// حواف الطريق وخطوط المسارات
+box(.3,.08,240,0xffffff,-7.3,0,-85);
+box(.3,.08,240,0xffffff,7.3,0,-85);
+const stripes=[];
+for(let i=0;i<24;i++){
+ for(let x of [-2.5,2.5]){
+  const s=box(.12,.04,3,0xffffff,x,.02,-i*10);
+  stripes.push(s);
+ }
+}
+
+// مباني المدينة
+const buildings=[];
+for(let i=0;i<32;i++){
+ for(let side of [-1,1]){
+  const h=5+Math.random()*18;
+  const b=box(5,h,5,
+   [0x52677e,0x7c8795,0x35495e,0x967d70][Math.floor(Math.random()*4)],
+   side*(11+Math.random()*5),h/2,-i*9-5);
+  buildings.push(b);
+ }
+}
+
+// صنع سيارة ثلاثية الأبعاد
+function makeCar(color){
+ const g=new THREE.Group();
+ const body=new THREE.Mesh(
+  new THREE.BoxGeometry(1.8,.65,3.5),
+  new THREE.MeshStandardMaterial({color,metalness:.35,roughness:.3})
+ );
+ body.position.y=.75;
+ body.castShadow=true;
+ g.add(body);
+
+ const cabin=new THREE.Mesh(
+  new THREE.BoxGeometry(1.4,.65,1.65),
+  new THREE.MeshStandardMaterial({color:0x9ceaff,metalness:.3,roughness:.2})
+ );
+ cabin.position.set(0,1.35,-.25);
+ g.add(cabin);
+
+ for(let x of [-.95,.95]){
+  for(let z of [-1.1,1.1]){
+   const wheel=new THREE.Mesh(
+    new THREE.CylinderGeometry(.38,.38,.22,16),
+    new THREE.MeshStandardMaterial({color:0x111111})
+   );
+   wheel.rotation.z=Math.PI/2;
+   wheel.position.set(x,.42,z);
+   g.add(wheel);
+  }
+ }
+ const lightMat=new THREE.MeshBasicMaterial({color:0xffffcc});
+ for(let x of [-.55,.55]){
+  const lamp=new THREE.Mesh(new THREE.BoxGeometry(.35,.18,.08),lightMat);
+  lamp.position.set(x,.8,-1.78);
+  g.add(lamp);
+ }
+ scene.add(g);
+ return g;
+}
+
+const player=makeCar(0xff2020);
+player.position.set(0,0,4);
+
+const enemies=[];
+for(let i=0;i<5;i++){
+ const car=makeCar([0xffcc00,0x2266ff,0xffffff,0x11cc88][i%4]);
+ car.position.set([-4,0,4][Math.floor(Math.random()*3)],0,-35-i*30);
+ enemies.push(car);
+}
+
+let lane=1;
+let score=0,coins=0,speed=.65;
+let playing=false,boosting=false;
+let last=0;
+
+function move(d){
+ if(!playing)return;
+ lane=Math.max(0,Math.min(2,lane+d));
+}
+function boost(){
+ if(!playing)return;
+ boosting=true;
+ setTimeout(()=>boosting=false,1800);
 }
 function startGame(){
- if(running)return;
- running=true;score=0;lane=1;enemyY=-100;speed=5;
- player.style.left="50%";
- message.textContent="انطلق! تجنب السيارات!";
- timer=setInterval(update,40);
-}
-function update(){
- score++;
- scoreText.textContent=score;
- speedText.textContent=speed;
- enemyY+=speed;
- enemy.style.top=enemyY+"px";
- if(enemyY>document.getElementById("game").clientHeight){
-  enemyY=-100;
-  enemy.style.left=(20+Math.floor(Math.random()*3)*25)+"%";
-  coins++;
-  coinsText.textContent=coins;
- }
- let p=player.getBoundingClientRect();
- let e=enemy.getBoundingClientRect();
- if(p.left<e.right && p.right>e.left && p.top<e.bottom && p.bottom>e.top){
-  endGame();
- }
+ score=0;coins=0;speed=.65;lane=1;
+ player.position.x=0;
+ enemies.forEach((e,i)=>{
+  e.position.z=-35-i*30;
+  e.position.x=[-4,0,4][Math.floor(Math.random()*3)];
+ });
+ playing=true;
+ document.getElementById("message").textContent="";
+ document.getElementById("start").style.display="none";
 }
 function endGame(){
- running=false;clearInterval(timer);
- message.textContent="💥 انتهى السباق! نقاطك: "+score;
+ playing=false;
+ document.getElementById("message").textContent="💥 انتهى السباق! نتيجتك: "+score;
+ document.getElementById("start").textContent="العب مرة ثانية";
+ document.getElementById("start").style.display="block";
 }
+
+function animate(){
+ requestAnimationFrame(animate);
+ const dt=Math.min((performance.now()-last)/16.67,2);
+ last=performance.now();
+
+ if(playing){
+  const currentSpeed=boosting?1.45:speed;
+  player.position.x+=( [-4,0,4][lane]-player.position.x)*.13*dt;
+
+  stripes.forEach(s=>{
+   s.position.z+=currentSpeed*dt*2;
+   if(s.position.z>12)s.position.z-=240;
+  });
+  buildings.forEach(b=>{
+   b.position.z+=currentSpeed*dt*2;
+   if(b.position.z>15)b.position.z-=288;
+  });
+
+  enemies.forEach(e=>{
+   e.position.z+=currentSpeed*dt*1.8;
+   if(e.position.z>12){
+    e.position.z=-100-Math.random()*30;
+    e.position.x=[-4,0,4][Math.floor(Math.random()*3)];
+    score+=10;
+    coins++;
+   }
+   if(Math.abs(e.position.z-player.position.z)<2.3 &&
+      Math.abs(e.position.x-player.position.x)<1.5){
+    endGame();
+   }
+  });
+
+  score+=.12*dt;
+  document.getElementById("score").textContent=Math.floor(score);
+  document.getElementById("coins").textContent=coins;
+  document.getElementById("speed").textContent=boosting?"نيترو":"سريع";
+ }
+
+ camera.position.x+=(player.position.x*.35-camera.position.x)*.04;
+ camera.lookAt(player.position.x*.2,1,-8);
+ renderer.render(scene,camera);
+}
+animate();
+
 document.addEventListener("keydown",e=>{
- if(e.key==="ArrowLeft")move(-1);
- if(e.key==="ArrowRight")move(1);
- if(e.code==="Space")nitro();
+ if(e.key==="ArrowLeft"||e.key==="a")move(-1);
+ if(e.key==="ArrowRight"||e.key==="d")move(1);
+ if(e.code==="Space")boost();
 });
-let touchStart=0;
-document.getElementById("game").addEventListener("touchstart",e=>{
- touchStart=e.touches[0].clientX;
-});
-document.getElementById("game").addEventListener("touchend",e=>{
- let diff=e.changedTouches[0].clientX-touchStart;
- if(Math.abs(diff)>25)move(diff>0?1:-1);
+window.addEventListener("resize",()=>{
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
 });
 </script>
 </body>
 </html>
-
+nano index.html
