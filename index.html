@@ -1,436 +1,109 @@
+
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ODAY RACING</title>
-
-<style>
-* {
-  -webkit-tap-highlight-color: transparent;
-}
-
-body {
-  margin: 0;
-  background: #080d1b;
-  color: white;
-  font-family: Arial, sans-serif;
-  text-align: center;
-}
-
-header {
-  padding: 18px;
-  background: #111a30;
-  color: #00d9ff;
-  font-size: 25px;
-  font-weight: bold;
-}
-
-.info {
-  display: flex;
-  justify-content: space-around;
-  padding: 12px;
-  font-size: 18px;
-}
-
-.game-area {
-  position: relative;
-  width: min(100%, 380px);
-  margin: auto;
-}
-
-canvas {
-  display: block;
-  width: 100%;
-  height: auto;
-  background: #222;
-  border: 3px solid #00d9ff;
-  border-radius: 12px;
-}
-
-.overlay {
-  position: absolute;
-  inset: 0;
-  background: #000b;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-  border-radius: 12px;
-}
-
-.overlay h2 {
-  color: #00d9ff;
-  font-size: 32px;
-}
-
-button {
-  border: none;
-  border-radius: 12px;
-  padding: 14px 25px;
-  margin: 8px;
-  background: #00cfff;
-  color: #06101b;
-  font-weight: bold;
-  font-size: 18px;
-  cursor: pointer;
-  touch-action: none;
-}
-
-.controls {
-  display: flex;
-  justify-content: center;
-  gap: 35px;
-  padding: 15px;
-}
-
-.controls button {
-  width: 100px;
-  font-size: 27px;
-  background: #111a30;
-  color: white;
-  border: 2px solid #00d9ff;
-}
-
-footer {
-  padding: 15px;
-  color: #888;
-}
-</style>
-</head>
-
-<body>
-
-<header>🏎️ ODAY RACING</header>
-
-<div class="info">
-  <div>النقاط: <span id="score">0</span></div>
-  <div>السرعة: <span id="speed">1</span></div>
-</div>
-
-<div class="game-area">
-  <canvas id="game" width="360" height="640"></canvas>
-
-  <div class="overlay" id="menu">
-    <h2>ODAY RACING</h2>
-    <p>هل تستطيع تجنب السيارات؟</p>
-    <button onclick="startGame()">ابدأ السباق 🚗</button>
-  </div>
-</div>
-
-<div class="controls">
-  <button id="left">⬅️</button>
-  <button id="right">➡️</button>
-</div>
-
-<footer>© 2026 ODAY RACING</footer>
-
-<script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-
-const scoreText = document.getElementById("score");
-const speedText = document.getElementById("speed");
-const menu = document.getElementById("menu");
-
-let player = {
-  x: 180,
-  y: 525,
-  width: 42,
-  height: 75
-};
-
-let obstacles = [];
-let score = 0;
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>ODAY RACING</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#050b16;color:white;font-family:Arial;overflow:hidden}
-canvas{display:block}
-#menu,#garage,#gameover{position:fixed;inset:0;background:linear-gradient(135deg,#061326ee,#02050ddd);display:flex;align-items:center;justify-content:center;padding:15px}
-.panel{width:100%;max-width:550px;background:#101e34;border:1px solid #16dfff;border-radius:22px;padding:24px;text-align:center;box-shadow:0 0 35px #00dfff33}
-h1{font-size:48px;color:#20eaff;text-shadow:0 0 20px #00cfff}
-h2{color:#20eaff}
-button{border:0;border-radius:13px;padding:14px 20px;margin:6px;font-size:17px;font-weight:bold;background:#19dff4;color:#06101c;cursor:pointer}
-button.gold{background:#ffd34e}
-button.dark{background:#263a55;color:white}
-.hidden{display:none!important}
-.stats{display:flex;justify-content:space-around;margin:15px 0}
-.stat{background:#1c304b;padding:12px;border-radius:12px}
-#hud{position:fixed;top:12px;left:10px;right:10px;display:flex;justify-content:space-between;pointer-events:none}
-.hudbox{background:#061326dd;padding:10px;border-radius:10px;border:1px solid #16dfff}
-#controls{position:fixed;bottom:18px;left:0;right:0;display:flex;justify-content:space-between;padding:0 16px}
-.control{width:68px;height:68px;border-radius:18px;background:#102b47dd;color:white;border:1px solid #20eaff;font-size:27px;touch-action:none}
-#cars{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.car{background:#1c304b;border-radius:14px;padding:12px}
-.car.selected{border:2px solid #20eaff}
-.car span{font-size:35px}
-#message{color:#ffd34e;min-height:25px}
+body{margin:0;background:#090d16;color:white;font-family:Arial;text-align:center;overflow:hidden}
+header{padding:12px;background:#111827;font-size:24px;font-weight:bold;color:#00e5ff}
+#stats{display:flex;justify-content:space-around;padding:10px;background:#172033}
+#game{position:relative;width:100%;height:68vh;overflow:hidden;background:linear-gradient(#182b3d,#34434d)}
+.road{position:absolute;left:15%;width:70%;height:100%;background:#292d35;border-left:6px solid white;border-right:6px solid white}
+.line{position:absolute;left:50%;height:100%;border-left:5px dashed #eee;animation:move .7s linear infinite}
+@keyframes move{from{transform:translateY(-100px)}to{transform:translateY(0)}}
+.car{position:absolute;width:48px;height:85px;border-radius:12px 12px 7px 7px;background:linear-gradient(90deg,#a80000,#ff3434,#a80000);bottom:20px;left:calc(50% - 24px);border:3px solid #eee;box-shadow:0 0 15px #f33}
+.car:before{content:"";position:absolute;top:15px;left:7px;width:28px;height:24px;background:#8deaff;border-radius:5px}
+.enemy{position:absolute;width:45px;height:78px;border-radius:10px;background:#ffcc00;border:3px solid white;top:-100px}
+#controls{display:flex;justify-content:space-around;padding:15px}
+button{background:#00bcd4;color:#00131a;border:0;border-radius:12px;padding:15px 25px;font-size:19px;font-weight:bold}
+#start{margin:12px}
+#message{font-size:20px;color:#00e5ff;padding:8px}
 </style>
 </head>
 <body>
-<div id="world"></div>
-
-<div id="hud" class="hidden">
- <div class="hudbox">🏆 <span id="score">0</span></div>
- <div class="hudbox">⚡ <span id="speed">0</span></div>
- <div class="hudbox">💰 <span id="money">0</span></div>
+<header>🏁 ODAY RACING</header>
+<div id="stats">
+<span>النقاط: <b id="score">0</b></span>
+<span>السرعة: <b id="speed">1</b></span>
+<span>العملات: <b id="coins">0</b></span>
 </div>
-
-<div id="controls" class="hidden">
- <div>
-  <button class="control" id="left">◀</button>
-  <button class="control" id="right">▶</button>
- </div>
- <button class="control" id="nitro">⚡</button>
+<div id="game">
+<div class="road"></div>
+<div class="line"></div>
+<div id="player" class="car"></div>
+<div id="enemy" class="enemy"></div>
 </div>
-
-<div id="menu">
- <div class="panel">
-  <h1>ODAY RACING</h1>
-  <p>مرحباً بك في عالم السرعة 🏎️</p>
-  <div class="stats">
-   <div class="stat">💰 رصيدك<br><b id="balance">0</b></div>
-   <div class="stat">🏆 أفضل نتيجة<br><b id="record">0</b></div>
-  </div>
-  <button onclick="startGame()">🏁 ابدأ السباق</button>
-  <button class="gold" onclick="openGarage()">🚘 كراج السيارات</button>
-  <p>تفادى السيارات واجمع العملات واستخدم النيترو!</p>
- </div>
+<div id="message">استعد للسباق يا بطل!</div>
+<button id="start" onclick="startGame()">ابدأ السباق 🚀</button>
+<div id="controls">
+<button onclick="move(-1)">⬅️ يسار</button>
+<button onclick="nitro()">🔥 نيترو</button>
+<button onclick="move(1)">يمين ➡️</button>
 </div>
-
-<div id="garage" class="hidden">
- <div class="panel">
-  <h2>🚘 كراج ODAY</h2>
-  <p>رصيدك: <b id="garageMoney">0</b> 💰</p>
-  <div id="cars"></div>
-  <p id="message"></p>
-  <button class="dark" onclick="showMenu()">رجوع</button>
- </div>
-</div>
-
-<div id="gameover" class="hidden">
- <div class="panel">
-  <h2>💥 انتهى السباق!</h2>
-  <h3>نتيجتك: <span id="finalScore">0</span></h3>
-  <p>العملات التي جمعتها: <span id="earned">0</span></p>
-  <button onclick="startGame()">العب مرة ثانية</button>
-  <button class="dark" onclick="showMenu()">القائمة الرئيسية</button>
- </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
-let scene,camera,renderer,player,clock;
-let playing=false,score=0,earned=0,coins=Number(localStorage.coins||0);
-let best=Number(localStorage.best||0),lane=0,steer=0,nitro=false;
-let traffic=[],moneyObjects=[],roadMarks=[];
-let selected=Number(localStorage.selected||0);
-let owned=JSON.parse(localStorage.owned||"[0]");
-const cars=[
- {name:"SPORT",color:0x13dfff,price:0,emoji:"🏎️"},
- {name:"FIRE",color:0xff3030,price:150,emoji:"🔥"},
- {name:"GOLD",color:0xffd32a,price:300,emoji:"👑"},
- {name:"NEON",color:0x9c55ff,price:500,emoji:"💜"}
-];
-const $=id=>document.getElementById(id);
-
-function update(){
- $("balance").textContent=coins;
- $("garageMoney").textContent=coins;
- $("money").textContent=coins+earned;
- $("record").textContent=best;
+const player=document.getElementById("player");
+const enemy=document.getElementById("enemy");
+const scoreText=document.getElementById("score");
+const coinsText=document.getElementById("coins");
+const speedText=document.getElementById("speed");
+const message=document.getElementById("message");
+let lane=1,score=0,coins=0,speed=5,running=false,enemyY=-100;
+let timer;
+function move(dir){
+ if(!running)return;
+ lane=Math.max(0,Math.min(2,lane+dir));
+ player.style.left=(25+lane*25)+"%";
+ player.style.transform="translateX(-50%)";
 }
-function hideScreens(){
- ["menu","garage","gameover"].forEach(x=>$(x).classList.add("hidden"));
-}
-function showMenu(){
- playing=false;hideScreens();$("menu").classList.remove("hidden");
- $("hud").classList.add("hidden");$("controls").classList.add("hidden");update();
-}
-function makeBox(w,h,d,color,x,y,z,parent=scene){
- let m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color,roughness:.65}));
- m.position.set(x,y,z);parent.add(m);return m;
-}
-function makeCar(color){
- let g=new THREE.Group();
- makeBox(.95,.42,1.8,color,0,.55,0,g);
- makeBox(.7,.4,.85,0x172b40,0,.92,-.1,g);
- makeBox(.8,.12,.22,0xffffff,0,.65,.92,g);
- makeBox(.8,.12,.22,0xff1717,0,.65,-.92,g);
- for(let x of [-.53,.53])for(let z of [-.58,.62]){
-  makeBox(.22,.42,.4,0x080b10,x,.32,z,g);
- }
- return g;
-}
-function init(){
- if(renderer)return;
- scene=new THREE.Scene();
- scene.background=new THREE.Color(0x83b5d3);
- scene.fog=new THREE.Fog(0x83b5d3,35,120);
- camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,250);
- camera.position.set(0,6,10);
- camera.lookAt(0,0,-7);
- renderer=new THREE.WebGLRenderer({antialias:true});
- renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
- renderer.setSize(innerWidth,innerHeight);
- $("world").appendChild(renderer.domElement);
- scene.add(new THREE.HemisphereLight(0xffffff,0x45556a,2));
- let sun=new THREE.DirectionalLight(0xffffff,2);
- sun.position.set(-5,12,8);scene.add(sun);
-
- makeBox(200,.1,200,0x345b39,0,-.2,-40);
- makeBox(11,.15,150,0x252a34,0,-.08,-40);
- for(let x of [-3.7,3.7])makeBox(.12,.03,150,0xffffff,x,.02,-40);
- for(let x of [-1.85,1.85]){
-  for(let z=-110;z<20;z+=8){
-   let m=makeBox(.1,.03,3.5,0xffffff,x,.03,z);
-   roadMarks.push(m);
-  }
- }
- for(let side of [-1,1]){
-  makeBox(3,.2,150,0x777d84,side*7,-.03,-40);
-  for(let z=-110;z<20;z+=14){
-   let h=6+Math.random()*12;
-   let b=makeBox(4,h,5,0x52677e,side*11,h/2,z);
-   for(let y=2;y<h-1;y+=2){
-    makeBox(.5,.6,.04,0x9edcf2,side*11,y,z+2.53);
-   }
-  }
- }
- player=makeCar(cars[selected].color);
- player.position.set(0,0,3);scene.add(player);
- clock=new THREE.Clock();
- addEventListener("resize",resize);
-}
-function resize(){
- if(!renderer)return;
- camera.aspect=innerWidth/innerHeight;
- camera.updateProjectionMatrix();
- renderer.setSize(innerWidth,innerHeight);
-}
-function clearObjects(){
- traffic.forEach(o=>scene.remove(o));
- moneyObjects.forEach(o=>scene.remove(o));
- traffic=[];moneyObjects=[];
+function nitro(){
+ if(running){speed=11;setTimeout(()=>speed=5,2000)}
 }
 function startGame(){
- init();clearObjects();
- score=0;earned=0;lane=0;steer=0;
- player.position.x=0;
- hideScreens();playing=true;
- $("hud").classList.remove("hidden");
- $("controls").classList.remove("hidden");
- clock.getDelta();
- renderer.setAnimationLoop(loop);
+ if(running)return;
+ running=true;score=0;lane=1;enemyY=-100;speed=5;
+ player.style.left="50%";
+ message.textContent="انطلق! تجنب السيارات!";
+ timer=setInterval(update,40);
 }
-function spawnCar(){
- let laneX=[-2.45,0,2.45][Math.floor(Math.random()*3)];
- let o=makeCar([0xff3333,0xffc32d,0x9a66ff,0xffffff][Math.floor(Math.random()*4)]);
- o.position.set(laneX,0,-100);scene.add(o);traffic.push(o);
-}
-function spawnMoney(){
- let m=new THREE.Mesh(new THREE.TorusGeometry(.4,.13,8,18),
- new THREE.MeshStandardMaterial({color:0xffd32a,emissive:0x805000}));
- m.position.set([-2.45,0,2.45][Math.floor(Math.random()*3)],.9,-100);
- scene.add(m);moneyObjects.push(m);
-}
-let timer=0;
-function finish(){
- playing=false;
- $("hud").classList.add("hidden");$("controls").classList.add("hidden");
- $("finalScore").textContent=Math.floor(score);
- $("earned").textContent=earned;
- coins+=earned;
- if(score>best)best=Math.floor(score);
- localStorage.coins=coins;localStorage.best=best;
- update();hideScreens();$("gameover").classList.remove("hidden");
-}
-function loop(){
- let dt=Math.min(clock.getDelta(),.04);
- if(playing){
-  score+=dt*(nitro?34:18);
-  $("score").textContent=Math.floor(score);
-  $("speed").textContent=Math.floor(nitro?230:145);
-  player.position.x+=steer*dt*7;
-  player.position.x=THREE.MathUtils.clamp(player.position.x,-3,3);
-  player.rotation.z=THREE.MathUtils.damp(player.rotation.z,-steer*.15,7,dt);
-  timer-=dt;
-  if(timer<=0){
-   spawnCar();
-   if(Math.random()>.35)spawnMoney();
-   timer=1+Math.random()*.7;
-  }
-  let speed=(nitro?.95:.65)*dt*35;
-  roadMarks.forEach(m=>{m.position.z+=speed;if(m.position.z>12)m.position.z-=128});
-  traffic.forEach((o,i)=>{
-   o.position.z+=speed;
-   if(o.position.z>12){scene.remove(o);traffic.splice(i,1)}
-   else if(Math.abs(o.position.x-player.position.x)<1.05&&Math.abs(o.position.z-player.position.z)<1.5)finish();
-  });
-  moneyObjects.forEach((o,i)=>{
-   o.position.z+=speed;o.rotation.y+=dt*3;
-   if(Math.abs(o.position.x-player.position.x)<1&&Math.abs(o.position.z-player.position.z)<1.5){
-    earned++;scene.remove(o);moneyObjects.splice(i,1);$("money").textContent=coins+earned;
-   }else if(o.position.z>12){scene.remove(o);moneyObjects.splice(i,1)}
-  });
-  camera.position.x=THREE.MathUtils.damp(camera.position.x,player.position.x*.25,3,dt);
-  camera.lookAt(player.position.x*.18,0,-7);
+function update(){
+ score++;
+ scoreText.textContent=score;
+ speedText.textContent=speed;
+ enemyY+=speed;
+ enemy.style.top=enemyY+"px";
+ if(enemyY>document.getElementById("game").clientHeight){
+  enemyY=-100;
+  enemy.style.left=(20+Math.floor(Math.random()*3)*25)+"%";
+  coins++;
+  coinsText.textContent=coins;
  }
- renderer.render(scene,camera);
+ let p=player.getBoundingClientRect();
+ let e=enemy.getBoundingClientRect();
+ if(p.left<e.right && p.right>e.left && p.top<e.bottom && p.bottom>e.top){
+  endGame();
+ }
 }
-function bind(id,fn){
- let el=$(id);
- el.addEventListener("pointerdown",e=>{e.preventDefault();fn(true)});
- ["pointerup","pointercancel","pointerleave"].forEach(ev=>el.addEventListener(ev,()=>fn(false)));
+function endGame(){
+ running=false;clearInterval(timer);
+ message.textContent="💥 انتهى السباق! نقاطك: "+score;
 }
-bind("left",v=>steer=v?-1:(steer===-1?0:steer));
-bind("right",v=>steer=v?1:(steer===1?0:steer));
-bind("nitro",v=>nitro=v);
-addEventListener("keydown",e=>{
- if(e.key==="ArrowLeft")steer=-1;
- if(e.key==="ArrowRight")steer=1;
- if(e.code==="Space")nitro=true;
+document.addEventListener("keydown",e=>{
+ if(e.key==="ArrowLeft")move(-1);
+ if(e.key==="ArrowRight")move(1);
+ if(e.code==="Space")nitro();
 });
-addEventListener("keyup",e=>{
- if(e.key==="ArrowLeft"||e.key==="ArrowRight")steer=0;
- if(e.code==="Space")nitro=false;
+let touchStart=0;
+document.getElementById("game").addEventListener("touchstart",e=>{
+ touchStart=e.touches[0].clientX;
 });
-function openGarage(){
- hideScreens();$("garage").classList.remove("hidden");
- drawCars();
-}
-function drawCars(){
- $("cars").innerHTML="";
- cars.forEach((c,i)=>{
-  let d=document.createElement("div");
-  d.className="car"+(selected===i?" selected":"");
-  d.innerHTML=`<span>${c.emoji}</span><h3>${c.name}</h3>
-  <p>${owned.includes(i)?"مملوكة":"السعر: "+c.price+" 💰"}</p>
-  <button>${owned.includes(i)?"اختيار":"شراء"}</button>`;
-  d.querySelector("button").onclick=()=>{
-   if(owned.includes(i)){
-    selected=i;localStorage.selected=i;
-    $("message").textContent="تم اختيار السيارة!";
-   }else if(coins>=c.price){
-    coins-=c.price;owned.push(i);selected=i;
-    localStorage.coins=coins;localStorage.owned=JSON.stringify(owned);
-    localStorage.selected=i;
-    $("message").textContent="مبروك! اشتريت السيارة.";
-   }else $("message").textContent="عملاتك لا تكفي!";
-   update();drawCars();
-  };
-  $("cars").appendChild(d);
- });
-}
-update();
-})();
+document.getElementById("game").addEventListener("touchend",e=>{
+ let diff=e.changedTouches[0].clientX-touchStart;
+ if(Math.abs(diff)>25)move(diff>0?1:-1);
+});
 </script>
 </body>
 </html>
+
