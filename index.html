@@ -4,63 +4,370 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>موقعي الأول</title>
+<title>ODAY RACING</title>
+
 <style>
-* {box-sizing:border-box}
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
-  margin:0;
-  font-family:Arial;
-  background:#080d1b;
-  color:white;
-  text-align:center;
+  margin: 0;
+  background: #080d1b;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
 }
+
 header {
-  padding:25px;
-  background:#111a30;
-  font-size:25px;
-  font-weight:bold;
+  padding: 18px;
+  background: #111a30;
+  color: #00d9ff;
+  font-size: 25px;
+  font-weight: bold;
 }
-main {padding:65px 20px}
-h1 {font-size:35px;color:#00d9ff}
-p {color:#b9c5d8;font-size:17px}
+
+.info {
+  display: flex;
+  justify-content: space-around;
+  padding: 12px;
+  font-size: 18px;
+}
+
+.game-area {
+  position: relative;
+  width: min(100%, 380px);
+  margin: auto;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #222;
+  border: 3px solid #00d9ff;
+  border-radius: 12px;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: #000b;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.overlay h2 {
+  color: #00d9ff;
+  font-size: 32px;
+}
+
 button {
-  padding:15px 30px;
-  background:#00cfff;
-  border:0;
-  border-radius:12px;
-  font-size:17px;
-  font-weight:bold;
-  cursor:pointer;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 25px;
+  margin: 8px;
+  background: #00cfff;
+  color: #06101b;
+  font-weight: bold;
+  font-size: 18px;
+  cursor: pointer;
+  touch-action: none;
 }
-.card {
-  background:#111a30;
-  margin:25px auto;
-  padding:25px;
-  border-radius:18px;
-  max-width:350px;
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 35px;
+  padding: 15px;
 }
-footer {padding:25px;color:#888}
+
+.controls button {
+  width: 100px;
+  font-size: 27px;
+  background: #111a30;
+  color: white;
+  border: 2px solid #00d9ff;
+}
+
+footer {
+  padding: 15px;
+  color: #888;
+}
 </style>
 </head>
+
 <body>
 
-<header>MY WEBSITE 🚀</header>
+<header>🏎️ ODAY RACING</header>
 
-<main>
-<h1>أهلاً بك في موقعي</h1>
-<p>هذا أول موقع أصنعه باستخدام Termux</p>
-
-<div class="card">
-<h2>مشروعي الأول</h2>
-<p>مرحباً بك في عالمي البرمجي!</p>
-<button onclick="alert('أهلاً بك! ❤️')">
-اضغط هنا
-</button>
+<div class="info">
+  <div>النقاط: <span id="score">0</span></div>
+  <div>السرعة: <span id="speed">1</span></div>
 </div>
-</main>
 
-<footer>جميع الحقوق محفوظة © 2026</footer>
+<div class="game-area">
+  <canvas id="game" width="360" height="640"></canvas>
+
+  <div class="overlay" id="menu">
+    <h2>ODAY RACING</h2>
+    <p>هل تستطيع تجنب السيارات؟</p>
+    <button onclick="startGame()">ابدأ السباق 🚗</button>
+  </div>
+</div>
+
+<div class="controls">
+  <button id="left">⬅️</button>
+  <button id="right">➡️</button>
+</div>
+
+<footer>© 2026 ODAY RACING</footer>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const scoreText = document.getElementById("score");
+const speedText = document.getElementById("speed");
+const menu = document.getElementById("menu");
+
+let player = {
+  x: 180,
+  y: 525,
+  width: 42,
+  height: 75
+};
+
+let obstacles = [];
+let score = 0;
+let speed = 4;
+let roadLine = 0;
+let running = false;
+let lastTime = 0;
+let spawnTimer = 0;
+let keys = { left: false, right: false };
+
+const colors = ["#ff3333", "#ffcc00", "#9b59ff", "#eeeeee"];
+
+function drawCar(x, y, color, isPlayer = false) {
+  ctx.save();
+
+  // Wheels
+  ctx.fillStyle = "#080808";
+  ctx.fillRect(x - 5, y + 12, 7, 18);
+  ctx.fillRect(x + 40, y + 12, 7, 18);
+  ctx.fillRect(x - 5, y + 49, 7, 18);
+  ctx.fillRect(x + 40, y + 49, 7, 18);
+
+  // Car body
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.roundRect(x, y, 42, 75, 10);
+  ctx.fill();
+
+  // Windows
+  ctx.fillStyle = "#102b45";
+  ctx.fillRect(x + 7, y + 14, 28, 19);
+  ctx.fillRect(x + 7, y + 42, 28, 14);
+
+  // Lights
+  ctx.fillStyle = isPlayer ? "#00eaff" : "#ff3333";
+  ctx.fillRect(x + 5, y + 3, 9, 5);
+  ctx.fillRect(x + 28, y + 3, 9, 5);
+
+  ctx.restore();
+}
+
+function drawRoad() {
+  ctx.fillStyle = "#176b36";
+  ctx.fillRect(0, 0, 360, 640);
+
+  ctx.fillStyle = "#30343a";
+  ctx.fillRect(35, 0, 290, 640);
+
+  // Road edges
+  ctx.fillStyle = "#eeeeee";
+  ctx.fillRect(35, 0, 5, 640);
+  ctx.fillRect(320, 0, 5, 640);
+
+  // Road lane lines
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 4;
+  ctx.setLineDash([35, 30]);
+
+  ctx.beginPath();
+  ctx.moveTo(132, -50 + roadLine);
+  ctx.lineTo(132, 690);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(228, -50 + roadLine);
+  ctx.lineTo(228, 690);
+  ctx.stroke();
+
+  ctx.setLineDash([]);
+}
+
+function drawGame() {
+  drawRoad();
+
+  obstacles.forEach(car => {
+    drawCar(car.x, car.y, car.color);
+  });
+
+  drawCar(player.x - 21, player.y, "#00d9ff", true);
+}
+
+function spawnCar() {
+  const lanes = [83, 180, 277];
+  const lane = lanes[Math.floor(Math.random() * lanes.length)];
+
+  obstacles.push({
+    x: lane - 21,
+    y: -90,
+    color: colors[Math.floor(Math.random() * colors.length)]
+  });
+}
+
+function collision(a, b) {
+  return (
+    a.x < b.x + 42 &&
+    a.x + 42 > b.x &&
+    a.y < b.y + 75 &&
+    a.y + 75 > b.y
+  );
+}
+
+function gameOver() {
+  running = false;
+
+  menu.innerHTML = `
+    <h2>انتهى السباق! 💥</h2>
+    <p>نتيجتك: ${score}</p>
+    <button onclick="startGame()">العب مرة أخرى 🔄</button>
+  `;
+
+  menu.style.display = "flex";
+}
+
+function update(delta) {
+  const step = delta / 16.67;
+
+  roadLine = (roadLine + speed * step) % 65;
+
+  if (keys.left) player.x -= 5 * step;
+  if (keys.right) player.x += 5 * step;
+
+  player.x = Math.max(61, Math.min(299, player.x));
+
+  speed = 4 + score / 120;
+  speedText.textContent = Math.floor(speed / 4);
+
+  spawnTimer += delta;
+
+  if (spawnTimer > Math.max(450, 1100 - score * 2)) {
+    spawnCar();
+    spawnTimer = 0;
+  }
+
+  obstacles.forEach(car => {
+    car.y += speed * step;
+
+    if (collision(
+      { x: player.x - 21, y: player.y },
+      car
+    )) {
+      gameOver();
+    }
+  });
+
+  obstacles = obstacles.filter(car => {
+    if (car.y > 650) {
+      score += 10;
+      scoreText.textContent = score;
+      return false;
+    }
+    return true;
+  });
+}
+
+function loop(time) {
+  if (!running) return;
+
+  const delta = Math.min(time - lastTime || 16, 40);
+  lastTime = time;
+
+  update(delta);
+  drawGame();
+
+  if (running) requestAnimationFrame(loop);
+}
+
+function startGame() {
+  player.x = 180;
+  obstacles = [];
+  score = 0;
+  speed = 4;
+  roadLine = 0;
+  spawnTimer = 0;
+  lastTime = 0;
+
+  keys.left = false;
+  keys.right = false;
+
+  scoreText.textContent = "0";
+  speedText.textContent = "1";
+
+  menu.style.display = "none";
+  running = true;
+
+  drawGame();
+  requestAnimationFrame(loop);
+}
+
+// Keyboard controls
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft" || e.key === "a")
+    keys.left = true;
+
+  if (e.key === "ArrowRight" || e.key === "d")
+    keys.right = true;
+});
+
+document.addEventListener("keyup", e => {
+  if (e.key === "ArrowLeft" || e.key === "a")
+    keys.left = false;
+
+  if (e.key === "ArrowRight" || e.key === "d")
+    keys.right = false;
+});
+
+// Mobile touch controls
+function setupButton(id, direction) {
+  const btn = document.getElementById(id);
+
+  btn.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    keys[direction] = true;
+  });
+
+  ["pointerup", "pointercancel", "pointerleave"].forEach(event => {
+    btn.addEventListener(event, () => {
+      keys[direction] = false;
+    });
+  });
+}
+
+setupButton("left", "left");
+setupButton("right", "right");
+
+drawRoad();
+</script>
 
 </body>
 </html>
-
